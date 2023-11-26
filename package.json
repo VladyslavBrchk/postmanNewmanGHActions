@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "yaml-server": "^1.10.0"
+    "yaml-server": "^1.10.0",
+    "punycode": "2.1.1"
   }
 }
