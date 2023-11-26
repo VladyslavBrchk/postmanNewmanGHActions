@@ -28,14 +28,14 @@ jobs:
           newman run petstore.collection.json -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html
         continue-on-error: true
 
-      - name: Output the run Details
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload the artifact
         uses: actions/upload-artifact@v2
         with:
           name: RunReports
           path: testResults
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
 
       - name: Deploy to GitHub Pages
         id: deployment
