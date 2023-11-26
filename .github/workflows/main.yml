@@ -1,12 +1,9 @@
 name: Test-Build
-
 on: [push]
-
 permissions:
   contents: read
   pages: write
   id-token: write
-
 jobs:
   test-api:
     runs-on: ubuntu-latest
@@ -31,26 +28,14 @@ jobs:
           newman run petstore.collection.json -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html
         continue-on-error: true
 
-      - name: Upload the artifact
+      - name: Output the run Details
         uses: actions/upload-artifact@v2
         with:
-          name: test-results
+          name: RunReports
           path: testResults
 
-  deploy-pages:
-    runs-on: ubuntu-latest
-    needs: test-api
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "21.x"
-
-      - name: Deploy to GitHub Pages
+      - name: Deploy API Reports
         uses: peaceiris/actions-gh-pages@v3
         with:
-          deploy_key: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./testResults
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./testResult
