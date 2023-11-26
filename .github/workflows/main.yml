@@ -16,16 +16,15 @@ jobs:
 
       - name: Install newman
         run: |
-          npm install -g newman 
-          npm install -g newman-reporter-allure
-          npm install -g allure-commandline
+          npm install -g newman
+          npm install -g newman-reporter-htmlextra
 
       - name: Make Directory for results
         run: mkdir -p testResults
 
       - name: Run POSTMAN collection
         run: |
-          newman run petstore.collection.json -r allure --reporter-allure-export testResults/htmlreport.html
+          newman run store.collection.json -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html --reporter-htmlextra-darkTheme > testResults/runreport1.html
 
       - name: Output the run Details
         uses: actions/upload-artifact@v2
