@@ -1,9 +1,5 @@
 name: Test-Build
 on: [push]
-permissions:
-  contents: read
-  pages: write
-  id-token: write
 jobs:
   test-api:
     runs-on: ubuntu-latest
