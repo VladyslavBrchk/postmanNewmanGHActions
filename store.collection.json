@@ -1,0 +1,649 @@
+{
+	"info": {
+		"_postman_id": "e925ba09-bad0-4776-a7aa-4c69862084c7",
+		"name": "store",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "31360695"
+	},
+	"item": [
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Create product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();\r",
+									"pm.collectionVariables.set('postedItemName', responseJson.name);\r",
+									"\r",
+									"pm.test(\"Successful POST request\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"orange\",\r\n    \"price\": 8,\r\n    \"sku\": 123321123,\r\n    \"description\": \"wouh\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/products"
+					},
+					"response": []
+				},
+				{
+					"name": "List products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {\r",
+									"  \"items\": {\r",
+									"    \"type\": \"object\",\r",
+									"    \"properties\": {\r",
+									"      \"id\": {\r",
+									"        \"type\": \"number\"\r",
+									"      },\r",
+									"      \"name\": {\r",
+									"        \"type\": \"string\"\r",
+									"      },\r",
+									"      \"price\": {\r",
+									"        \"type\": \"number\"\r",
+									"      },\r",
+									"      \"sku\": {\r",
+									"        \"type\": \"number\"\r",
+									"      },\r",
+									"      \"description\": {\r",
+									"        \"type\": \"string\"\r",
+									"      }\r",
+									"    },\r",
+									"    \"required\": [\r",
+									"      \"id\",\r",
+									"      \"name\",\r",
+									"      \"price\",\r",
+									"      \"sku\",\r",
+									"      \"description\"\r",
+									"    ]\r",
+									"  }\r",
+									"}\r",
+									"const responseItems = pm.response.json();\r",
+									"const totalProductsVal = responseItems.length;\r",
+									"pm.collectionVariables.set(\"productsVal\", totalProductsVal);\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"pm.test(\"Content-Type is present\", function () {\r",
+									"    pm.response.to.have.header(\"Content-Type\");\r",
+									"});\r",
+									"pm.test('Schema is valid', function() {\r",
+									"    pm.expect(tv4.validate(responseItems, schema)).to.be.true;\r",
+									"});\r",
+									"pm.test('Element is posted', function() {\r",
+									"    pm.expect(responseItems.some(item => item.name === pm.collectionVariables.get('postedItemName'))).to.be.true;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/products"
+					},
+					"response": []
+				},
+				{
+					"name": "Get product by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/products/3"
+					},
+					"response": []
+				},
+				{
+					"name": "List products Pagination_1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"function paginate(totalElements, pageSize) {\r",
+									"    const result = [];\r",
+									"    while (totalElements > 0) {\r",
+									"        const currentPageSize = Math.min(totalElements, pageSize);\r",
+									"        result.push(currentPageSize);\r",
+									"        totalElements -= currentPageSize;\r",
+									"    }\r",
+									"    return result;\r",
+									"}\r",
+									"\r",
+									"const responseItems = pm.response.json();\r",
+									"const pageValue = pm.request.url.query.get('page');\r",
+									"const pageSizeValue = pm.request.url.query.get('pageSize');\r",
+									"\r",
+									"const pagination = paginate(pm.collectionVariables.get(\"productsVal\"), pageSizeValue)[pageValue-1]\r",
+									"\r",
+									"pm.test(\"Pagination Test\", function () {\r",
+									"    pm.expect(responseItems).to.be.an(\"array\");\r",
+									"    pm.expect(responseItems.length).to.eql(pagination);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products?page=1&pageSize=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List products Pagination_2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"function paginate(totalElements, pageSize) {\r",
+									"    const result = [];\r",
+									"    while (totalElements > 0) {\r",
+									"        const currentPageSize = Math.min(totalElements, pageSize);\r",
+									"        result.push(currentPageSize);\r",
+									"        totalElements -= currentPageSize;\r",
+									"    }\r",
+									"    return result;\r",
+									"}\r",
+									"\r",
+									"const responseItems = pm.response.json();\r",
+									"const pageValue = pm.request.url.query.get('page');\r",
+									"const pageSizeValue = pm.request.url.query.get('pageSize');\r",
+									"\r",
+									"const pagination = paginate(pm.collectionVariables.get(\"productsVal\"), pageSizeValue)[pageValue-1]\r",
+									"\r",
+									"pm.test(\"Pagination Test\", function () {\r",
+									"    pm.expect(responseItems).to.be.an(\"array\");\r",
+									"    pm.expect(responseItems.length).to.eql(pagination);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products?page=1&pageSize=2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Products AZ sorting",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"function isSortedAZ(texts){\r",
+									"    for (let i = 1; i < texts.length; i++) {\r",
+									"        if (texts[i] < texts[i - 1]) {\r",
+									"            return false;\r",
+									"        }\r",
+									"    }\r",
+									"    return true;\r",
+									"}\r",
+									"const responseItems = pm.response.json();\r",
+									"const array = responseItems.map(item => item.name);\r",
+									"\r",
+									"pm.test(\"AZ Sorting Test\", function () {\r",
+									"    pm.expect(isSortedAZ(array)).to.be.true;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products?sortOrder=ASC&sortKey=name",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "sortOrder",
+									"value": "ASC"
+								},
+								{
+									"key": "sortKey",
+									"value": "name"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Products ZA sorting",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"function isSortedAZ(texts){\r",
+									"    for (let i = 1; i < texts.length; i++) {\r",
+									"        if (texts[i] > texts[i - 1]) {\r",
+									"            return false;\r",
+									"        }\r",
+									"    }\r",
+									"    return true;\r",
+									"}\r",
+									"const responseItems = pm.response.json();\r",
+									"const array = responseItems.map(item => item.name);\r",
+									"\r",
+									"pm.test(\"ZA Sorting Test\", function () {\r",
+									"    pm.expect(isSortedAZ(array)).to.be.true;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products?sortOrder=DESC&sortKey=name",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "sortOrder",
+									"value": "DESC"
+								},
+								{
+									"key": "sortKey",
+									"value": "name"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();\r",
+									"pm.collectionVariables.set('putItemName', responseJson.name);\r",
+									"pm.collectionVariables.set('putItemPrice', responseJson.price);\r",
+									"pm.collectionVariables.set('putItemSku', responseJson.sku);\r",
+									"pm.collectionVariables.set('putItemDescription', responseJson.description);\r",
+									"pm.collectionVariables.set('putItemId', responseJson.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 4,\r\n    \"name\": \"banana\",\r\n    \"price\": 155,\r\n    \"sku\": 123321123,\r\n    \"description\": \"changed description\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/products"
+					},
+					"response": []
+				},
+				{
+					"name": "List products after Update",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseItems = pm.response.json();\r",
+									"\r",
+									"const expectedObject = {\r",
+									"    \"id\": pm.collectionVariables.get('putItemId'),\r",
+									"    \"name\": pm.collectionVariables.get('putItemName'),\r",
+									"    \"price\": pm.collectionVariables.get('putItemPrice'),\r",
+									"    \"sku\": pm.collectionVariables.get('putItemSku'),\r",
+									"    \"description\": pm.collectionVariables.get('putItemDescription')\r",
+									"};\r",
+									"\r",
+									"\r",
+									"pm.test('Element is Updated', function () {\r",
+									"    pm.expect(responseItems.some(item => _.isEqual(item, expectedObject))).to.be.true;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/products"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove product by ID",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{baseUrl}}/products/4"
+					},
+					"response": []
+				},
+				{
+					"name": "Get product by ID after Delete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/products/4"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "List orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/orders"
+					},
+					"response": []
+				},
+				{
+					"name": "Get order by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/orders/3"
+					},
+					"response": []
+				},
+				{
+					"name": "Create order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"order5\",\r\n    \"sku\": 123425445656765\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/orders"
+					},
+					"response": []
+				},
+				{
+					"name": "Update order",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 4,\r\n    \"name\": \"order5\",\r\n    \"sku\": 123425445656765\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/orders"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove order by ID",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{baseUrl}}/orders/4"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "List users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/users"
+					},
+					"response": []
+				},
+				{
+					"name": "Get user by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/users/3"
+					},
+					"response": []
+				},
+				{
+					"name": "Create user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\": \"Dream\",\r\n    \"lastName\": \"Real\",\r\n    \"email\": \"dream.real@gmail.com\",\r\n    \"dateOfBirth\": \"2001-10-99\",\r\n    \"emailVerified\": true,\r\n    \"signUpDate\": \"2019-08-24\",\r\n    \"status\": \"active\",\r\n    \"level\": \"lord\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/users"
+					},
+					"response": []
+				},
+				{
+					"name": "Update user",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\": \"Ilon\",\r\n    \"lastName\": \"Mask\",\r\n    \"email\": \"ilon.mask@gmail.com\",\r\n    \"dateOfBirth\": \"2001-10-99\",\r\n    \"emailVerified\": true,\r\n    \"signUpDate\": \"2019-08-24\",\r\n    \"status\": \"active\",\r\n    \"level\": \"lord\",\r\n    \"id\": 10\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/users"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove user by ID",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{baseUrl}}/users/10"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "productsVal",
+			"value": ""
+		},
+		{
+			"key": "postedItemName",
+			"value": ""
+		},
+		{
+			"key": "putItemName",
+			"value": ""
+		},
+		{
+			"key": "putItemPrice",
+			"value": ""
+		},
+		{
+			"key": "putItemSku",
+			"value": ""
+		},
+		{
+			"key": "putItemDescription",
+			"value": ""
+		},
+		{
+			"key": "putItemId",
+			"value": ""
+		}
+	]
+}
