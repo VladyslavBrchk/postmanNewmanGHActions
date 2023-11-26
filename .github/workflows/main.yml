@@ -29,6 +29,9 @@ jobs:
         with:
           name: RunReports
           path: testResults
+
+      - name: Sleep before deploy
+        run: sleep 10
     
       - name: Deploy API Reports
         uses: peaceiris/actions-gh-pages@v3
