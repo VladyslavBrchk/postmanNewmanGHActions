@@ -12,7 +12,7 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v1
         with:
-          node-version: "20.9.0"
+          node-version: "21.x"
 
       - name: Install newman
         run: |
