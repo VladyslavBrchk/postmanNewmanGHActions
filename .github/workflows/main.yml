@@ -27,7 +27,7 @@ jobs:
       - name: Output the run Details
         uses: actions/upload-artifact@v2
         with:
-          name: RunReports
+          name: test-results
           path: testResults
 
       - name: Deploy API Reports
