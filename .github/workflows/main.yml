@@ -30,8 +30,8 @@ jobs:
           name: RunReports
           path: testResults
     
-      - name: Deploy Cypress Reports
+      - name: Deploy API Reports
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./Postman-newman-ghActions/testResults
+          publish_dir: ./postmanNewmanGHActions/testResults
