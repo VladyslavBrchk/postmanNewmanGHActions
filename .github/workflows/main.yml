@@ -43,6 +43,7 @@ jobs:
     #      github_token: ${{ secrets.GITHUB_TOKEN }}
     #      publish_dir: ./testResults
   deploy:
+    needs: test-api
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
